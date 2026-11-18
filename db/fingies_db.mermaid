@@ -1,0 +1,190 @@
+erDiagram
+    CUSTOMERS ||--o{ ADDRESSES : "tiene"
+    CUSTOMERS ||--o{ ORDERS : "realiza"
+    CUSTOMERS ||--o{ COUPON_REDEMPTIONS : "usa"
+    CUSTOMERS ||--o{ WHATSAPP_CONVERSATIONS : "conversa (futuro)"
+
+    ADDRESSES ||--o{ ORDERS : "envio_a"
+    ADDRESSES ||--o{ ORDERS : "factura_a"
+
+    PRODUCT_CATEGORIES ||--o{ PRODUCTS : "clasifica"
+
+    PRODUCTS ||--o{ ORDER_ITEMS : "aparece_en"
+
+    ORDERS ||--|{ ORDER_ITEMS : "contiene"
+    ORDERS ||--o{ PAYMENTS : "tiene"
+    ORDERS ||--o{ ORDER_STATUS_HISTORY : "registra"
+    ORDERS ||--o{ COUPON_REDEMPTIONS : "aplica"
+
+    COUPONS ||--o{ COUPON_REDEMPTIONS : "redime"
+
+    WHATSAPP_CONVERSATIONS ||--o{ WHATSAPP_MESSAGES : "contiene (futuro)"
+
+    CUSTOMERS {
+        uuid id PK
+        varchar email UK
+        varchar phone UK
+        varchar full_name
+        varchar status "lead | customer | vip | inactive"
+        varchar source "web | whatsapp | instagram | manual"
+        text notes
+        jsonb metadata
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    ADDRESSES {
+        uuid id PK
+        uuid customer_id FK
+        varchar label "casa | oficina"
+        varchar type "shipping | billing | both"
+        varchar recipient_name
+        varchar phone
+        text street_address
+        varchar city
+        varchar state
+        varchar postal_code
+        varchar country
+        boolean is_default
+        timestamptz created_at
+    }
+
+    PRODUCT_CATEGORIES {
+        uuid id PK
+        varchar name
+        varchar slug UK
+        text description
+        varchar image_url
+        boolean is_active
+        int sort_order
+        timestamptz created_at
+    }
+
+    PRODUCTS {
+        uuid id PK
+        uuid category_id FK
+        varchar name
+        varchar slug UK
+        text description
+        varchar short_description
+        numeric price
+        numeric compare_at_price
+        int stock
+        varchar sku UK
+        jsonb images
+        boolean is_active
+        jsonb metadata
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    ORDERS {
+        uuid id PK
+        varchar order_number UK
+        uuid customer_id FK
+        uuid shipping_address_id FK
+        uuid billing_address_id FK
+        varchar status "pending | confirmed | processing | shipped | delivered | cancelled | refunded"
+        varchar payment_status "pending | paid | failed | refunded"
+        numeric subtotal
+        numeric tax
+        numeric shipping_cost
+        numeric discount
+        numeric total
+        varchar currency "COP"
+        varchar source "web | whatsapp"
+        text notes
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    ORDER_ITEMS {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        varchar product_name "snapshot"
+        varchar product_sku "snapshot"
+        int quantity
+        numeric unit_price "snapshot"
+        numeric total_price
+        timestamptz created_at
+    }
+
+    PAYMENTS {
+        uuid id PK
+        uuid order_id FK
+        varchar gateway "wompi | mercadopago | payu | bold | stripe"
+        varchar gateway_transaction_id
+        varchar gateway_customer_id "para tokenizacion"
+        varchar method "card | pse | nequi | cash"
+        numeric amount
+        varchar currency
+        varchar status "pending | processing | succeeded | failed | refunded"
+        text error_message
+        jsonb raw_response
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    ORDER_STATUS_HISTORY {
+        uuid id PK
+        uuid order_id FK
+        varchar previous_status
+        varchar new_status
+        varchar changed_by "system | webhook | n8n | admin"
+        text notes
+        timestamptz created_at
+    }
+
+    EVENTS_OUTBOX {
+        uuid id PK
+        varchar event_type "order.created | order.paid | lead.captured | etc"
+        varchar entity_type "order | customer"
+        uuid entity_id "referencia polimorfica"
+        jsonb payload
+        varchar status "pending | processing | processed | failed"
+        int attempts
+        timestamptz processed_at
+        timestamptz created_at
+    }
+
+    COUPONS {
+        uuid id PK
+        varchar code UK
+        varchar type "percentage | fixed_amount"
+        numeric value
+        numeric min_purchase
+        int max_uses
+        int current_uses
+        timestamptz valid_from
+        timestamptz valid_until
+        boolean is_active
+        timestamptz created_at
+    }
+
+    COUPON_REDEMPTIONS {
+        uuid id PK
+        uuid coupon_id FK
+        uuid order_id FK
+        uuid customer_id FK
+        timestamptz created_at
+    }
+
+    WHATSAPP_CONVERSATIONS {
+        uuid id PK
+        uuid customer_id FK "nullable"
+        varchar phone
+        varchar current_state "browsing | awaiting_payment | completed"
+        jsonb context "carrito temporal"
+        timestamptz last_message_at
+        timestamptz created_at
+    }
+
+    WHATSAPP_MESSAGES {
+        uuid id PK
+        uuid conversation_id FK
+        varchar direction "in | out"
+        text content
+        varchar message_type
+        timestamptz created_at
+    }
