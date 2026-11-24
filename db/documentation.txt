@@ -1,1 +1,5 @@
-// Se queda en : Abrir plataforma de supabase para la creaciion de SQL 
+Orden:
+1. Se realiza integración y creación de base de datos SQL en supabase schema.sql, se insertan
+   nuevos productos para probar que el insert si funciona en supabase OK.
+2. Se realiza creacion em .env.local para conectar next con supabase. 
+3. Se realiza valida para ya conectar el front API con este backend.
