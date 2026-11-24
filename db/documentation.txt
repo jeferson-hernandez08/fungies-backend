@@ -1,0 +1,1 @@
+// Se queda en : Abrir plataforma de supabase para la creaciion de SQL 
