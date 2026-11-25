@@ -3,3 +3,4 @@ Orden:
    nuevos productos para probar que el insert si funciona en supabase OK.
 2. Se realiza creacion em .env.local para conectar next con supabase. 
 3. Se realiza valida para ya conectar el front API con este backend.
+4. Se sesactiva antigravity por proeevedor en espera con POSADA
